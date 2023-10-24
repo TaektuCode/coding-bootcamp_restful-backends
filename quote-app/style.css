@@ -1,0 +1,73 @@
+@import url("https://fonts.googleapis.com/css2?family=Dancing+Script&family=Open+Sans:wght@400;500;600&display=swap");
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100vh;
+}
+
+.app-conatiner {
+  display: flex;
+  flex-wrap: nowrap;
+  height: 40vh;
+  width: 80vh;
+  margin: 0 auto;
+  flex-direction: column;
+  border: 4px solid dodgerblue;
+}
+
+.container-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: dodgerblue;
+  opacity: 1;
+}
+h1 {
+  width: fit-content;
+  color: white;
+  margin-left: 2rem;
+}
+
+#new-quote-btn {
+  width: fit-content;
+  height: 2rem;
+  border-radius: 1rem;
+  border: 3px solid white;
+  font-size: 18px;
+  color: white;
+  font-weight: bold;
+  margin-right: 2rem;
+  background-color: green;
+  cursor: pointer;
+}
+
+.quote-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin-top: 4rem;
+}
+
+.quote {
+  font-family: "Dancing Script", cursive;
+  font-weight: bold;
+  font-size: 23px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.author {
+  font-style: italic;
+  opacity: 0.7;
+  align-self: flex-start;
+  padding: 0 1rem;
+}

@@ -1,0 +1,85 @@
+/* Google Fonts */
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600&family=Pacifico&display=swap");
+
+/* Reset some default styles */
+body,
+h1 {
+  margin: 0;
+  padding: 0;
+}
+
+/* Center the container vertically */
+body {
+  font-family: Arial, sans-serif;
+  background-color: aquamarine;
+  display: flex;
+
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+}
+
+/* APP CONTAINER */
+
+.app-container {
+  padding: 2rem;
+  border-radius: 2rem;
+  background-color: snow;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  min-height: 80vh;
+}
+
+h1 {
+  font-family: "Pacifico", cursive;
+  border-radius: 1rem;
+  background-color: aquamarine;
+  margin-bottom: 2rem;
+  padding: 1rem;
+}
+
+.status-box {
+  margin-bottom: 2rem;
+}
+
+#new-todo {
+  font-size: 20px;
+  margin-bottom: 2rem;
+  height: 2rem;
+  width: 100%;
+}
+
+#add-todo {
+  border: 2px solid black;
+  border-radius: 1rem;
+  background-color: aquamarine;
+  box-shadow: 2px 2px black;
+  height: 2rem;
+  width: fit-content;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+#todo-list {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+li {
+  font-size: 20px;
+  margin: 0.3rem;
+}
+
+#remove-done {
+  border: 2px solid black;
+  border-radius: 1rem;
+  box-shadow: 2px 2px black;
+
+  margin-top: auto;
+  font-size: 25px;
+  background-color: aquamarine;
+}
