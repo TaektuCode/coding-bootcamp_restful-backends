@@ -7,7 +7,7 @@
 // 7. Filtering todos (all todos; open todos; done todos)
 // 8. Remove done todos (implement a button for this)
 
-let todos = loadTodosFromLocalStorage() || [];
+let todos = [];
 
 const todoList = document.getElementById("todo-list");
 const newTodoInput = document.getElementById("new-todo");
@@ -28,8 +28,6 @@ function loadTodos() {
   fetch("http://localhost:4730/todos")
     .then((res) => res.json())
     .then((todosFromApi) => {
-      // Assuming that the API returns an array of to-dos
-      todos = loadTodosFromLocalStorage() || [];
       renderTodos(); // Call renderTodos here to display the loaded data
     })
     .catch((error) => {
@@ -65,7 +63,6 @@ function addTodo() {
       .then((addedTodo) => {
         // The API should return the added to-do with an ID
         todos.push(addedTodo);
-        saveTodosToLocalStorage(todos);
         newTodoInput.value = "";
         renderTodos();
       })
@@ -90,7 +87,6 @@ function removeDoneTodos() {
         .then(() => {
           // Remove the to-do from the local todos array
           todos = todos.filter((todo) => !doneTodoIds.includes(todo.id));
-          saveTodosToLocalStorage(todos);
           renderTodos();
         })
         .catch((error) => {
@@ -102,17 +98,7 @@ function removeDoneTodos() {
   }
 }
 
-/* UPDATE LOCAL STORAGE */
-function saveTodosToLocalStorage(todos) {
-  localStorage.setItem("todos", JSON.stringify(todos));
-}
-
-/* LOAD TODOS FROM LOCALSTORAGE */
-function loadTodosFromLocalStorage() {
-  const storedTodos = localStorage.getItem("todos");
-  return storedTodos ? JSON.parse(storedTodos) : [];
-}
-
+/* RENDER TODOS */
 function renderTodos() {
   todoList.innerHTML = "";
 
@@ -145,7 +131,7 @@ function renderTodos() {
           }),
         })
           .then(() => {
-            saveTodosToLocalStorage(todos);
+            renderTodos();
           })
           .catch((error) => {
             console.error("Error updating to-do status:", error);
