@@ -23,12 +23,12 @@ filterAllCheckbox.addEventListener("change", updateFilter);
 filterOpenCheckbox.addEventListener("change", updateFilter);
 filterDoneCheckbox.addEventListener("change", updateFilter);
 
-/* Load Todos */
 function loadTodos() {
   fetch("http://localhost:4730/todos")
     .then((res) => res.json())
     .then((todosFromApi) => {
-      renderTodos(); // Call renderTodos here to display the loaded data
+      todos = todosFromApi;
+      renderTodos();
     })
     .catch((error) => {
       console.error("Error loading to-dos from the API:", error);
@@ -59,13 +59,13 @@ function addTodo() {
       },
       body: JSON.stringify(newTodo),
     })
-      .then((res) => res.json())
-      .then((addedTodo) => {
-        // The API should return the added to-do with an ID
-        todos.push(addedTodo);
-        newTodoInput.value = "";
-        renderTodos();
-      })
+      .then(() => loadTodos(), (newTodoInput.value = ""))
+      // .then((addedTodo) => {
+      //   // The API should return the added to-do with an ID
+      //   todos.push(addedTodo);
+      //   newTodoInput.value = "";
+      //   renderTodos();
+      // })
       .catch((error) => {
         console.error("Error adding a new to-do:", error);
       });
