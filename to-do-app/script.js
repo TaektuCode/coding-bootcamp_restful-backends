@@ -152,6 +152,12 @@ function updateFilter() {
   filterDoneCheckbox.checked = false;
 
   this.checked = true; // Make the clicked checkbox true
+}
 
+/* ON LOAD */
+function onLoad() {
+  loadTodos();
   renderTodos();
 }
+
+onLoad();
