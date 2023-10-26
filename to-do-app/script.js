@@ -1,47 +1,44 @@
-// 1. implement application state
-// 2. Input field and button to add new Todos
-// 3. Todo have two properties: description and ID
-// 4. Use local storage to save current state of t he app
-// 5. checkboxes for the different todos (status of a todo done or not done)
-// 6. Duplicate check (no duplicates are allowed)
-// 7. Filtering todos (all todos; open todos; done todos)
-// 8. Remove done todos (implement a button for this)
-
-let todos = [];
+const todos = [];
 
 const todoList = document.getElementById("todo-list");
 const newTodoInput = document.getElementById("new-todo");
 const addTodoButton = document.getElementById("add-todo");
 const removeDoneButton = document.getElementById("remove-done");
-const filterAllCheckbox = document.getElementById("filter-all");
-const filterOpenCheckbox = document.getElementById("filter-open");
-const filterDoneCheckbox = document.getElementById("filter-done");
+const filterCheckboxes = {
+  all: document.getElementById("filter-all"),
+  open: document.getElementById("filter-open"),
+  done: document.getElementById("filter-done"),
+};
 
 addTodoButton.addEventListener("click", addTodo);
 removeDoneButton.addEventListener("click", removeDoneTodos);
-filterAllCheckbox.addEventListener("change", updateFilter);
-filterOpenCheckbox.addEventListener("change", updateFilter);
-filterDoneCheckbox.addEventListener("change", updateFilter);
+Object.values(filterCheckboxes).forEach((checkbox) => {
+  checkbox.addEventListener("change", updateFilter);
+});
 
-function loadTodos() {
-  fetch("http://localhost:4730/todos")
-    .then((res) => res.json())
-    .then((todosFromApi) => {
-      todos = todosFromApi;
+// LOAD TODOS //
+
+async function loadTodos() {
+  try {
+    const response = await fetch("http://localhost:4730/todos");
+    if (response.ok) {
+      const todosFromApi = await response.json();
+      todos.length = 0;
+      todos.push(...todosFromApi);
       renderTodos();
-    })
-    .catch((error) => {
-      console.error("Error loading to-dos from the API:", error);
-    });
+    } else {
+      throw new Error(`Failed to load to-dos: ${response.status}`);
+    }
+  } catch (error) {
+    console.error("Error loading to-dos from the API:", error);
+  }
 }
 
-loadTodos();
+// ADD TODO //
 
-/* ADD TODOS */
-function addTodo() {
-  const newTodoText = newTodoInput.value.toLowerCase();
+async function addTodo() {
+  const newTodoText = newTodoInput.value.trim().toLowerCase();
 
-  // Check Duplicates
   if (
     newTodoText &&
     !todos.some((todo) => todo.description.toLowerCase() === newTodoText)
@@ -51,60 +48,69 @@ function addTodo() {
       done: false,
     };
 
-    // Send a POST request to the API to add the new to-do
-    fetch("http://localhost:4730/todos", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(newTodo),
-    })
-      .then(() => loadTodos(), (newTodoInput.value = ""))
-      // .then((addedTodo) => {
-      //   // The API should return the added to-do with an ID
-      //   todos.push(addedTodo);
-      //   newTodoInput.value = "";
-      //   renderTodos();
-      // })
-      .catch((error) => {
-        console.error("Error adding a new to-do:", error);
+    try {
+      const response = await fetch("http://localhost:4730/todos", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newTodo),
       });
+
+      if (response.ok) {
+        newTodoInput.value = "";
+        loadTodos();
+      } else {
+        throw new Error(`Failed to add a new to-do: ${response.status}`);
+      }
+    } catch (error) {
+      console.error("Error adding a new to-do:", error);
+    }
   } else {
     alert("Input field is empty or the to-do is already in the list!");
   }
 }
 
-/* REMOVE TODO */
-function removeDoneTodos() {
+// REMOVE TODOS //
+
+async function removeDoneTodos() {
   const doneTodoIds = todos.filter((todo) => todo.done).map((todo) => todo.id);
 
   if (doneTodoIds.length > 0) {
-    // Send DELETE requests for each completed to-do
-    doneTodoIds.forEach((id) => {
-      fetch(`http://localhost:4730/todos/${id}`, {
-        method: "DELETE",
-      })
-        .then(() => {
-          // Remove the to-do from the local todos array
-          todos = todos.filter((todo) => !doneTodoIds.includes(todo.id));
-          renderTodos();
+    try {
+      await Promise.all(
+        doneTodoIds.map(async (id) => {
+          const response = await fetch(`http://localhost:4730/todos/${id}`, {
+            method: "DELETE",
+          });
+
+          if (response.ok) {
+            todos.splice(
+              todos.findIndex((todo) => todo.id === id),
+              1
+            );
+          } else {
+            throw new Error(`Failed to delete to-do ${id}: ${response.status}`);
+          }
         })
-        .catch((error) => {
-          console.error("Error removing completed to-dos:", error);
-        });
-    });
+      );
+      renderTodos();
+    } catch (error) {
+      console.error("Error removing completed to-dos:", error);
+    }
   } else {
     alert("No completed to-dos to remove.");
   }
 }
 
-/* RENDER TODOS */
+// RENDER TODOS //
+
 function renderTodos() {
   todoList.innerHTML = "";
 
-  const showAll = filterAllCheckbox.checked;
-  const showOpen = filterOpenCheckbox.checked;
-  const showDone = filterDoneCheckbox.checked;
+  const showAll = filterCheckboxes.all.checked;
+  const showOpen = filterCheckboxes.open.checked;
+  const showDone = filterCheckboxes.done.checked;
 
   todos.forEach((todo) => {
     if (showAll || (showOpen && !todo.done) || (showDone && todo.done)) {
@@ -113,31 +119,35 @@ function renderTodos() {
         <input type="checkbox" ${todo.done ? "checked" : ""}>
         <span>${todo.description}</span>
       `;
-      const checkbox = li.querySelector("input[type=checkbox");
+      const checkbox = li.querySelector("input[type=checkbox]");
 
-      checkbox.addEventListener("change", () => {
-        // Update the status of the to-do when the checkbox changes
+      checkbox.addEventListener("change", async () => {
         todo.done = checkbox.checked;
 
-        // Send a PUT request to the API to update the to-do status
-        fetch(`http://localhost:4730/todos/${todo.id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            description: todo.description,
-            done: checkbox.checked,
-          }),
-        })
-          .then(() => {
-            renderTodos();
-          })
-          .catch((error) => {
-            console.error("Error updating to-do status:", error);
-          });
+        try {
+          const response = await fetch(
+            `http://localhost:4730/todos/${todo.id}`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                description: todo.description,
+                done: checkbox.checked,
+              }),
+            }
+          );
 
-        renderTodos();
+          if (!response.ok) {
+            throw new Error(
+              `Failed to update to-do status: ${response.status}`
+            );
+          }
+          renderTodos();
+        } catch (error) {
+          console.error("Error updating to-do status:", error);
+        }
       });
 
       todoList.appendChild(li);
@@ -145,19 +155,19 @@ function renderTodos() {
   });
 }
 
-/* FILTER */
-function updateFilter() {
-  filterAllCheckbox.checked = false;
-  filterOpenCheckbox.checked = false;
-  filterDoneCheckbox.checked = false;
+// UPDATE FILER
 
-  this.checked = true; // Make the clicked checkbox true
+function updateFilter() {
+  Object.values(filterCheckboxes).forEach((checkbox) => {
+    checkbox.checked = false;
+  });
+  this.checked = true;
 }
 
-/* ON LOAD */
-function onLoad() {
-  loadTodos();
+// ON LOAD //
+async function initialize() {
+  await loadTodos();
   renderTodos();
 }
 
-onLoad();
+initialize();
